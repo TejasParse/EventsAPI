@@ -23,7 +23,7 @@ const getEventById = async (req, res) => {
 
     if (id == undefined) {
 
-        const list = await collection.find({}).limit(limit).skip((page - 1) * limit).toArray();
+        const list = await collection.find({}).sort({schedule:-1}).limit(limit).skip((page - 1) * limit).toArray();
         res.json(list);
 
     } else {
@@ -92,8 +92,10 @@ const addEventPost = async (req, res) => {
 
 };
 
-const addEventPut = async (req, res) => {
+const updateEventPut = async (req, res) => {
 
+    const { id } = req.params;
+    console.log(id);
     console.log("File Input");
     console.log(req.file);
     console.log(req.files);
@@ -122,24 +124,26 @@ const addEventPut = async (req, res) => {
         })
     });
 
-    const temp = await collection.insertOne({
-        type: "event",
-        uid: 18,
-        name: req.body.name,
-        images: imageUrls,
-        tagline: req.body.tagline,
-        schedule: req.body.schedule,
-        description: req.body.description,
-        moderator: req.body.moderator,
-        category: req.body.category,
-        sub_category: req.body.sub_category,
-        rigor_rank: parseInt(req.body.rigor_rank),
-        attendees: req.body.attendees
-    });
+    const temp = await collection.replaceOne({
+            _id: new ObjectId(id)
+        },
+        {
+                type: "event",
+                uid: 18,
+                name: req.body.name,
+                images: imageUrls,
+                tagline: req.body.tagline,
+                schedule: req.body.schedule,
+                description: req.body.description,
+                moderator: req.body.moderator,
+                category: req.body.category,
+                sub_category: req.body.sub_category,
+                rigor_rank: parseInt(req.body.rigor_rank),
+                attendees: req.body.attendees
+        });
 
     res.json({
         status: "ok",
-        id: temp.insertedId
     });
 
 };
@@ -160,4 +164,4 @@ const deleteEventById = async (req, res) => {
     });
 }
 
-module.exports = { getEventById, addEventPost, addEventPut, deleteEventById }
+module.exports = { getEventById, addEventPost, updateEventPut, deleteEventById }
